@@ -1,0 +1,14 @@
+{
+    "functions": {
+          "api/audit.js": {
+                  "memory": 1024,
+                  "maxDuration": 60,
+                  "runtime": "nodejs18.x"
+          }
+    },
+    "env": {
+          "SCRAPINGBEE_API_KEY": "@scrapingbee_api_key",
+          "ZAPIER_WEBHOOK_URL": "@zapier_webhook_url",
+          "FIREBASE_CONFIG": "@firebase_config"
+    }
+}
