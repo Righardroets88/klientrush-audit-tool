@@ -1,14 +1,13 @@
 {
   "name": "klientrush-audit-tool",
-    "version": "1.0.0",
-      "description": "SEO Audit Tool for KlientRush",
-        "main": "api/audit.js",
-          "scripts": {
-              "dev": "vercel dev",
-                  "build": "echo 'No build needed'"
-                    },
-                      "dependencies": {
-                          "node-fetch": "^2.6.11"
-                            },
-                              "devDependencies": {}
-                              }
+  "version": "1.0.0",
+  "description": "SEO Audit Tool",
+  "scripts": {
+    "dev": "vercel dev",
+    "build": "echo 'No build needed'"
+  },
+  "dependencies": {
+    "cheerio": "^1.0.0",
+    "node-fetch": "^2.7.0"
+  }
+}
