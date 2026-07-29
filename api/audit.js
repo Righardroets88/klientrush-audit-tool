@@ -465,23 +465,16 @@ function calculatePerformanceScore(coreWebVitals) {
 }
 
 function getIndustryWeights(industry) {
-  const baseWeights = {
-    technical: 0.25,
-    onPage: 0.35,
-    content: 0.25,
-    schema: 0.10,
-    performance: 0.05
+  const weights = {
+    'general': { technical: 0.25, onPage: 0.35, content: 0.25, schema: 0.10, performance: 0.05 },
+    'ecommerce': { technical: 0.20, onPage: 0.35, content: 0.20, schema: 0.15, performance: 0.10 },
+    'saas': { technical: 0.30, onPage: 0.30, content: 0.20, schema: 0.05, performance: 0.15 },
+    'local': { technical: 0.20, onPage: 0.35, content: 0.15, schema: 0.20, performance: 0.10 },
+    'law': { technical: 0.20, onPage: 0.30, content: 0.35, schema: 0.10, performance: 0.05 },
+    'medical': { technical: 0.20, onPage: 0.30, content: 0.40, schema: 0.05, performance: 0.05 }
   };
 
-  const overrides = {
-    'ecommerce': { schema: 0.15, performance: 0.10, content: 0.20 },
-    'saas': { performance: 0.15, technical: 0.30, content: 0.20 },
-    'local': { schema: 0.20, technical: 0.20, onPage: 0.35 },
-    'law': { content: 0.35, onPage: 0.30, schema: 0.15 },
-    'medical': { content: 0.40, onPage: 0.30, schema: 0.10 }
-  };
-
-  return overrides[industry] || baseWeights;
+  return weights[industry] || weights['general'];
 }
 
 function rankCriticalIssues(analysis, coreWebVitals, industry) {
