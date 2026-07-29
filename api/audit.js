@@ -234,8 +234,9 @@ function analyzePageSEO($, url) {
   checks.readabilityGood = readability.fleschScore > 60;
   checks.paragraphStructure = readability.avgParagraphLength < 100;
 
-  if (!checks.readabilityGood && readability.valid) {
-    issues.push({ checkpoint: 34, severity: 'medium', message: `Readability score ${readability.fleschScore}/100 - simplify language`, category: 'Content' });
+  // Only report readability if it's extremely poor (< 30) to avoid false positives
+  if (readability.fleschScore < 30 && readability.valid) {
+    issues.push({ checkpoint: 34, severity: 'medium', message: `Content readability very low (${readability.fleschScore}/100) - simplify language and shorten sentences`, category: 'Content' });
   }
 
   // 37. Publication date
