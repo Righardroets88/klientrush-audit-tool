@@ -234,7 +234,9 @@ function analyzePageSEO($, url) {
   checks.readabilityGood = readability.fleschScore > 60;
   checks.paragraphStructure = readability.avgParagraphLength < 100;
 
-  if (!checks.readabilityGood) issues.push({ checkpoint: 34, severity: 'medium', message: `Readability score ${readability.fleschScore}/100 - simplify language`, category: 'Content' });
+  if (!checks.readabilityGood && readability.valid) {
+    issues.push({ checkpoint: 34, severity: 'medium', message: `Readability score ${readability.fleschScore}/100 - simplify language`, category: 'Content' });
+  }
 
   // 37. Publication date
   const pubDate = $('meta[property="article:published_time"]').attr('content') || $('time').attr('datetime');
@@ -313,22 +315,46 @@ async function getCoreWebVitals(url) {
 }
 
 function calculateReadability(text) {
-  const sentences = text.split(/[.!?]+/).filter(s => s.trim().length > 0).length;
-  const words = text.split(/\s+/).filter(w => w.length > 0).length;
-  const syllables = (text.match(/[aeiouy]/gi) || []).length;
+  // Remove extra whitespace and normalize
+  const cleanText = text.replace(/\s+/g, ' ').trim();
 
-  if (sentences === 0 || words === 0) {
-    return { fleschScore: 0, avgParagraphLength: 0 };
+  // Count sentences (improved)
+  const sentences = (cleanText.match(/[.!?]+/g) || []).length || 1;
+
+  // Count words
+  const wordArray = cleanText.split(/\s+/).filter(w => w.length > 1);
+  const words = wordArray.length;
+
+  if (sentences === 0 || words === 0 || words < 50) {
+    return { fleschScore: 75, avgParagraphLength: 20 }; // Default to neutral if insufficient content
   }
 
+  // Better syllable counting (more accurate)
+  let syllables = 0;
+  wordArray.forEach(word => {
+    word = word.toLowerCase().replace(/[^a-z]/g, '');
+    // Count vowel groups as syllables
+    const vowelGroups = (word.match(/[aeiouy]+/g) || []).length;
+    // Subtract 1 if ends with 'e'
+    let syl = Math.max(1, vowelGroups);
+    if (word.endsWith('e')) syl = Math.max(1, syl - 1);
+    if (word.endsWith('le') && word.length > 2) syl = Math.max(1, syl);
+    syllables += syl;
+  });
+
+  // Flesch Reading Ease formula
   const fleschScore = Math.max(0, Math.min(100,
     206.835 - (1.015 * (words / sentences)) - (84.6 * (syllables / words))
   ));
 
-  const paragraphs = text.split(/\n\n+/).filter(p => p.trim().length > 0).length;
+  const paragraphs = cleanText.split(/\n+/).filter(p => p.trim().length > 0).length || 1;
   const avgParagraphLength = Math.round(words / Math.max(paragraphs, 1));
 
-  return { fleschScore: Math.round(fleschScore), avgParagraphLength };
+  return {
+    fleschScore: Math.round(fleschScore),
+    avgParagraphLength,
+    valid: true
+  };
 }
 
 function calculateWeightedScores(analysis, coreWebVitals, industry) {
