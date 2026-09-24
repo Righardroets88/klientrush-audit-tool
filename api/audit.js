@@ -405,7 +405,10 @@ function calculateWeightedScores(analysis, cwv, industry) {
   const wc = analysis.wordCount;
   const depthPts = wc >= 800 ? 4 : wc >= 300 ? 3 : wc >= 150 ? 1 : 0;
   const readPts = !r.valid ? 0 : r.fleschScore >= 60 ? 4 : r.fleschScore >= 45 ? 3 : r.fleschScore >= 30 ? 2 : 1;
-  const content = Math.round(((depthPts + readPts + (c.paragraphStructure ? 2 : 0) + (c.freshness ? 1 : 0)) / 11) * 100);
+  // When there isn't enough running copy to measure readability (forms, tools, landing pages),
+  // those points are left out of the calculation instead of counting as a fail.
+  const contentMax = r.valid ? 11 : 5;
+  const content = Math.round(((depthPts + (r.valid ? readPts + (c.paragraphStructure ? 2 : 0) : 0) + (c.freshness ? 1 : 0)) / contentMax) * 100);
 
   const schema = pct([[c.schemaPresent, 3], [c.schemaValid, 2], [c.orgSchema, 2], [c.richSchema, 2]]);
   const performance = calculatePerformanceScore(cwv);
@@ -424,7 +427,7 @@ async function getCoreWebVitals(url) {
   if (!GOOGLE_PAGESPEED_API_KEY) return null;
   try {
     const endpoint = 'https://www.googleapis.com/pagespeedonline/v5/runPagespeed';
-    const r = await fetch(`${endpoint}?url=${encodeURIComponent(url)}&strategy=mobile&category=performance&key=${GOOGLE_PAGESPEED_API_KEY}`, { timeout: 45000 });
+    const r = await fetch(`${endpoint}?url=${encodeURIComponent(url)}&strategy=mobile&category=performance&key=${GOOGLE_PAGESPEED_API_KEY}`, { timeout: 35000 });
     const data = await r.json();
     const lr = data.lighthouseResult;
     if (!lr || !lr.audits) return null;
